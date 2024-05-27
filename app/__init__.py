@@ -1,12 +1,22 @@
-import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+from config import Config
 
-from dotenv import load_dotenv
+
+db = SQLAlchemy()
+migrate = Migrate()
+login = LoginManager()
+login.login_view = "login"
 
 
-load_dotenv()
+def create_app(config_class: Config = Config) -> Flask:
+    app = Flask(__name__)
+    app.config.from_object(config_class)
 
+    db.init_app(app)
+    migrate.init_app(app, db)
+    login.init_app(app)
 
-class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    return app
